@@ -27,7 +27,6 @@ export const createTablePosts = sql`CREATE TABLE IF NOT EXISTS posts (
     title TEXT NOT NULL,
     content TEXT,
     img_url TEXT,
-    rating INTEGER NOT NULL default 0,
 
     user_id INTEGER NOT NULL,
     subreddit_id INTEGER NOT NULL,
@@ -35,6 +34,16 @@ export const createTablePosts = sql`CREATE TABLE IF NOT EXISTS posts (
     FOREIGN KEY(subreddit_id) REFERENCES subreddits(id)
   );
 `;
+
+export const createTableVotes = sql`CREATE TABLE IF NOT EXISTS votes (\
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  post_id INTEGER NOT NULL,
+  direction TEXT NOT NULL,
+
+  FOREIGN KEY(user_id) REFERENCES users(id),
+  FOREIGN KEY(post_id) REFERENCES posts(id)
+);`
 
 export const createTableComments = sql`CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,9 +71,13 @@ export const getPostsForSubredditBySubredditId = sql`SELECT * FROM posts WHERE s
 
 export const getCommentsForPostByPostId = sql`SELECT * FROM comments WHERE post_id = ?;`;
 
-
 export const createUser = sql`INSERT INTO users (username, password) VALUES (?, ?);`;
 export const createSubreddit = sql`INSERT INTO subreddits (endpoint, name, description, img_url, created_by_user_id) VALUES (?, ?, ?, ?, ?);`;
 export const createPost = sql`INSERT INTO posts (title, content, img_url, user_id, subreddit_id) VALUES (?, ?, ?, ?, ?);`;
 export const createComment = sql`INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?);`;
 
+export const getRatingForPost = sql`SELECT SUM(direction) FROM votes WHERE post_id = ?;`;
+export const createVote = sql`INSERT INTO votes (user_id, post_id, direction) VALUES (?, ?, ?);`;
+export const findVotesByUserAndPost = sql`SELECT * FROM votes WHERE user_id = ? AND post_id = ?;`;
+
+export const updateVote = sql`UPDATE votes SET direction = ? WHERE user_id = ? AND post_id = ?;`;

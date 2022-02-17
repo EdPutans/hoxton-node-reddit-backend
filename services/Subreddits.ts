@@ -29,7 +29,9 @@ export const createSub = async (subredditParam: Omit<Subreddit, 'id' | 'endpoint
   if (subredditExists) return ({ error: "Subreddit already exists" });
 
   const { lastInsertRowid } = await createSubreddit({ ...subredditParam, endpoint });
-  const newSubreddit: Subreddit = await getSubredditById(Number(lastInsertRowid));
+  const newSubreddit: Subreddit | null = await getSubredditById(Number(lastInsertRowid));
+
+  if (!newSubreddit) return ({ error: "Something weird happened." });
 
   return newSubreddit;
 }

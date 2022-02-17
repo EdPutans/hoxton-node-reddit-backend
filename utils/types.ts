@@ -26,9 +26,9 @@ export type Post = {
   id: number;
   title: string;
   content: string;
-  img_url: string;
-  rating: number;
+  img_url?: string | null;
   user_id: number;
+  rating: number;
   subreddit_id: number;
 }
 
@@ -39,5 +39,11 @@ export type Comment = {
   post_id: number;
 }
 
+export type Vote = {
+  id: number;
+  user_id: number;
+  post_id: number;
+  direction: -1 | 1 | 0;
+}
 
 export type NoID<T> = Omit<T, 'id'>;
