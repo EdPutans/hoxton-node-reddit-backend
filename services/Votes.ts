@@ -28,6 +28,4 @@ export const handleUpdatePostRating = ({ user_id, post_id, direction }: NoID<Vot
   const updatedVote = getVoteForUserAndPost(user_id, post_id);
 
   return updatedVote;
-
-
 }
