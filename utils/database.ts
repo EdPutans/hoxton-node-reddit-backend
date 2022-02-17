@@ -1,6 +1,6 @@
 import Database, { RunResult } from 'better-sqlite3';
 import * as stmt from './queries'
-import { NoID, Post, Subreddit, User, Vote } from './types';
+import { NoID, Post, Subreddit, User, Vote, Comment } from './types';
 
 export const db = new Database(
   'database.db',
@@ -11,7 +11,7 @@ db.prepare(stmt.createTableUsers).run();
 db.prepare(stmt.createTableComments).run();
 db.prepare(stmt.createTablePosts).run();
 db.prepare(stmt.createTableSubreddits).run();
-
+db.prepare(stmt.createTableVotes).run();
 
 export const createUser = ({ username, password }: NoID<User>) =>
   db.prepare(stmt.createUser).run(username, password);
@@ -22,52 +22,65 @@ export const getUserById = (id: number) =>
 export const getUserByName = (name: string) =>
   db.prepare(stmt.getUserByUsername).get(name);
 
-export const getUsers = async () =>
+export const getUsers = () =>
   db.prepare(stmt.getUsers).all();
 
 
 
-export const createSubreddit = async ({ endpoint, name, description, img_url, created_by_user_id }: NoID<Subreddit>): Promise<RunResult> =>
+export const createSubreddit = ({ endpoint, name, description, img_url, created_by_user_id }: NoID<Subreddit>): RunResult =>
   db.prepare(stmt.createSubreddit).run(endpoint, name, description, img_url, created_by_user_id);
 
-export const getSubredditById = async (id: number): Promise<Subreddit | null> =>
+export const getSubredditById = (id: number): Subreddit | null =>
   db.prepare(stmt.getSubredditById).get(id)
 
-export const getSubredditByName = async (name: string): Promise<Subreddit | null> =>
+export const getSubredditByName = (name: string): Subreddit | null =>
   db.prepare(stmt.getSubredditByName).get(name);
 
-export const getSubredditByEndpoint = async (name: string): Promise<Subreddit | null> =>
+export const getSubredditByEndpoint = (name: string): Subreddit | null =>
   db.prepare(stmt.getSubredditByEndpoint).get(name);
 
-export const getSubreddits = async (): Promise<Subreddit[]> =>
+export const getSubreddits = (): Subreddit[] =>
   db.prepare(stmt.getSubreddits).all();
 
 
 
-export const getPosts = async (): Promise<Post[]> =>
-  db.prepare(stmt.getSubreddits).all();
+export const getPosts = (): Post[] =>
+  db.prepare(stmt.getAllPosts).all();
 
-export const getPostsBySubredditId = async (id: number): Promise<Post[] | null> =>
+export const getPostsBySubredditId = (id: number): Post[] | null =>
   db.prepare(stmt.getPostsForSubredditBySubredditId).all(id);
 
-export const getPostsBySubredditEndpoint = async (endpoint: string): Promise<Post[] | null> =>
+export const getPostsBySubredditEndpoint = (endpoint: string): Post[] | null =>
   db.prepare(stmt.getPostsForSubredditBySubredditId).all(endpoint);
 
-export const getPostById = async (id: number): Promise<Post | null> =>
-  db.prepare(stmt.getPostByPostId).get(id)
+export const getPostById = (id: number): Post | null =>
+  db.prepare(stmt.getPostByPostId).get(id);
 
-export const createPost = async ({ img_url, content, title, subreddit_id, user_id, }: NoID<Post>): Promise<RunResult> =>
+export const createPost = ({ img_url, content, title, subreddit_id, user_id, }: Omit<Post, 'id' | 'rating'>): RunResult =>
   db.prepare(stmt.createPost).run(title, content, img_url, user_id, subreddit_id);
 
-export const getRatingForPostId = async (id: number): Promise<RunResult> =>
-  db.prepare(stmt.getRatingForPost).get(id);
+export const getRatingForPostId = (id: number): { direction: Vote['direction'] }[] =>
+  db.prepare(stmt.getRatingForPost).all(id);
 
-export const createVote = async ({ post_id, user_id, direction }: NoID<Vote>): Promise<RunResult> =>
+export const createVote = ({ post_id, user_id, direction }: NoID<Vote>): RunResult =>
   db.prepare(stmt.createVote).run(user_id, post_id, direction);
 
-export const findVotesForUserPost = async ({ post_id, user_id }: Omit<Vote, 'direction' | 'id'>): Promise<Vote> =>
+export const findVotesForUserPost = ({ post_id, user_id }: Omit<Vote, 'direction' | 'id'>): Vote =>
   db.prepare(stmt.findVotesByUserAndPost).get(user_id, post_id);
 
-export const updateVoteForUserPost = async ({ post_id, user_id, direction }: NoID<Vote>): Promise<RunResult> =>
+export const updateVoteForUserPost = ({ post_id, user_id, direction }: NoID<Vote>): RunResult =>
   db.prepare(stmt.updateVote).run(direction, user_id, post_id);
 
+
+
+export const getAllComments = (): Comment[] =>
+  db.prepare(stmt.getAllComments).all();
+
+export const getCommentsForPost = (post_id: number): Comment[] =>
+  db.prepare(stmt.getCommentsForPostByPostId).all(post_id);
+
+export const getCommentById = (id: number): Comment =>
+  db.prepare(stmt.getCommentById).get(id);
+
+export const createComment = (comment: NoID<Comment>): RunResult =>
+  db.prepare(stmt.createComment).run(comment);

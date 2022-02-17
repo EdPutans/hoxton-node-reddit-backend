@@ -2,77 +2,78 @@ import { createPost, createVote, getPostsBySubredditId, getPostById, getPosts, g
 import { Query, Post, NoID, Vote } from "../utils/types";
 import { getVoteForUserAndPost, handleUpdatePostRating } from './Votes';
 
-export const aggregateRatingForPost = async (post: Post): Promise<Post> => {
-  const rating = await getRatingForPostId(post.id);
+export const aggregateRatingForPost = (post: Post): Post => {
+  const ratings = getRatingForPostId(post.id);
 
   const postCopy = { ...post };
   postCopy.rating = 0;
 
-  if (rating) {
-    console.log("Post id ", post.id, ' - aggregated raging: ', Number(rating));
-    post.rating = Number(rating);
+  if (ratings) {
+    ratings.forEach(rating => {
+      postCopy.rating += Number(rating.direction);
+    })
   }
 
   return postCopy;
 }
 
-export const getAllPosts = async (): Promise<Post[]> => {
-  const posts = await getPosts();
+export const getAllPosts = (): Post[] => {
+  const posts = getPosts();
 
   const resultPosts: Post[] = [];
 
   for (const post of posts) {
-    const aggregatedPost = await aggregateRatingForPost(post);
+    const aggregatedPost = aggregateRatingForPost(post);
     resultPosts.push(aggregatedPost);
   }
 
   return resultPosts;
 }
 
-export const getPostByPostId = async (id: Post['id']): Query<Post> => {
-  const foundPost = await getPostById(id);
+export const getPostByPostId = (id: Post['id']): Query<Post> => {
+  const foundPost = getPostById(id);
 
   if (!foundPost) return { error: "Post not found" };
 
-  const resultPost = await aggregateRatingForPost(foundPost);
+  const resultPost = aggregateRatingForPost(foundPost);
 
   return resultPost;
 }
 
-export const getPostsBySubId = async (id: Post['id']): Query<Post[]> => {
-  const posts = await getPostsBySubredditId(id);
+export const getPostsBySubId = (id: Post['id']): Query<Post[]> => {
+  const posts = getPostsBySubredditId(id);
 
   if (!posts) return { error: "No posts found" };
 
   const resultPosts: Post[] = [];
 
   for (const post of posts) {
-    const aggregatedPost = await aggregateRatingForPost(post);
+    const aggregatedPost = aggregateRatingForPost(post);
     resultPosts.push(aggregatedPost);
   }
 
   return resultPosts;
 }
 
-export const createNewPost = async (postParam: Omit<Post, 'id' | 'endpoint'>): Query<Post> => {
-  const { img_url, content, rating, subreddit_id, title, user_id } = postParam;
+export const createNewPost = (postParam: Omit<Post, 'id' | 'endpoint'>): Query<Post> => {
+  const { img_url, content, subreddit_id, title, user_id } = postParam;
 
-  if (content) return { error: "Content required" }
-  if (subreddit_id) return { error: "Subreddit id required" }
-  if (title) return { error: "Title required" }
-  if (user_id) return { error: "User id required" }
+  if (!content) return { error: "Content required" }
+  if (!subreddit_id) return { error: "Subreddit id required" }
+  if (!title) return { error: "Title required" }
+  if (!user_id) return { error: "User id required" }
 
-  const { lastInsertRowid } = await createPost({ img_url, content, rating, subreddit_id, title, user_id });
+  const { lastInsertRowid } = createPost({ img_url, content, subreddit_id, title, user_id });
   if (!lastInsertRowid) return ({ error: "Error creating post" });
 
-  const newlyCreatedPost: Post | null = await getPostById(Number(lastInsertRowid));
+  const newlyCreatedPost: Post | null = getPostById(Number(lastInsertRowid));
 
   if (!newlyCreatedPost) return ({ error: "Error creating post" });
 
   return newlyCreatedPost;
 }
 
-export const voteForPost = async (vote: NoID<Vote>): Query<Post> => {
+export const voteForPost = (vote: NoID<Vote>): Query<Post> => {
   if (!vote.user_id) return { error: "User id required" }
   if (!vote.post_id) return { error: "Post id required" }
 
@@ -81,15 +82,18 @@ export const voteForPost = async (vote: NoID<Vote>): Query<Post> => {
     (vote.direction !== 1 && vote.direction !== -1)
   ) return { error: "1/-1 required" };
 
-  const locatedPost = await getPostById(vote.post_id);
+  const locatedPost = getPostById(vote.post_id);
+
   if (!locatedPost) return { error: "Post not found" };
 
-  const userHasPreviousVote = await getVoteForUserAndPost(vote.user_id, vote.post_id);
-  if (userHasPreviousVote) await handleUpdatePostRating(vote)
+  const userHasPreviousVote = getVoteForUserAndPost(vote.user_id, vote.post_id);
+  if (userHasPreviousVote) {
+    handleUpdatePostRating(vote)
+  } else {
+    const { lastInsertRowid } = createVote(vote);
+    if (!lastInsertRowid) return { error: "Could not create vote" };
+  }
 
-  const { lastInsertRowid } = await createVote(vote);
-  if (!lastInsertRowid) return { error: "Could not create vote" };
-
-  const resultPost = await aggregateRatingForPost(locatedPost);
+  const resultPost = aggregateRatingForPost(locatedPost);
   return resultPost;
 }

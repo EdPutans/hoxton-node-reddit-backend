@@ -66,17 +66,19 @@ export const getUserById = sql`SELECT * FROM users WHERE id = ?;`;
 export const getUserByUsername = sql`SELECT * FROM users WHERE username = ?;`;
 
 export const getAllPosts = sql`SELECT * FROM posts;`;
-export const getPostByPostId = sql`SELECT * FROM posts WHERE id = ?;`;
+export const getPostByPostId = sql`SELECT * FROM posts WHERE id = ? LIMIT 1;`;
 export const getPostsForSubredditBySubredditId = sql`SELECT * FROM posts WHERE subreddit_id = ?;`;
 
+export const getAllComments = sql`SELECT * FROM comments;`;
 export const getCommentsForPostByPostId = sql`SELECT * FROM comments WHERE post_id = ?;`;
+export const getCommentById = sql`SELECT * FROM comments WHERE id = ?;`;
 
 export const createUser = sql`INSERT INTO users (username, password) VALUES (?, ?);`;
 export const createSubreddit = sql`INSERT INTO subreddits (endpoint, name, description, img_url, created_by_user_id) VALUES (?, ?, ?, ?, ?);`;
 export const createPost = sql`INSERT INTO posts (title, content, img_url, user_id, subreddit_id) VALUES (?, ?, ?, ?, ?);`;
 export const createComment = sql`INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?);`;
 
-export const getRatingForPost = sql`SELECT SUM(direction) FROM votes WHERE post_id = ?;`;
+export const getRatingForPost = sql`SELECT direction FROM votes WHERE post_id = ?;`;
 export const createVote = sql`INSERT INTO votes (user_id, post_id, direction) VALUES (?, ?, ?);`;
 export const findVotesByUserAndPost = sql`SELECT * FROM votes WHERE user_id = ? AND post_id = ?;`;
 

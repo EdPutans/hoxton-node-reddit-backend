@@ -3,7 +3,7 @@ export type ErrorType = { error: string }
 
 type Body<T> = { data: T } | ErrorType;
 
-export type Query<T> = Promise<T | ErrorType>
+export type Query<T> = T | ErrorType
 
 export type Req<T = { id: string }> = Request<T> & { body: Body<T> };
 export type Res<T> = Response<Body<T>>

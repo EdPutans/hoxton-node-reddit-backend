@@ -2,20 +2,20 @@ import { createSubreddit, getSubredditByEndpoint, getSubredditById, getSubreddit
 import { Query, Subreddit } from "../utils/types";
 import { createSubredditEndpoint } from "../utils/helpers";
 
-export const getAllSubreddits = async (): Promise<Subreddit[]> => {
-  const subs = await getSubreddits();
+export const getAllSubreddits = (): Subreddit[] => {
+  const subs = getSubreddits();
   return subs
 }
 
-export const getSubreddit = async (endpoint: Subreddit['endpoint']): Query<Subreddit> => {
-  const foundSubreddit = await getSubredditByEndpoint(endpoint);
+export const getSubreddit = (endpoint: Subreddit['endpoint']): Query<Subreddit> => {
+  const foundSubreddit = getSubredditByEndpoint(endpoint);
 
   if (!foundSubreddit) return { error: "Subreddit not found" };
 
   return foundSubreddit;
 }
 
-export const createSub = async (subredditParam: Omit<Subreddit, 'id' | 'endpoint'>): Query<Subreddit> => {
+export const createSub = (subredditParam: Omit<Subreddit, 'id' | 'endpoint'>): Query<Subreddit> => {
   const { name, description, img_url, created_by_user_id } = subredditParam;
 
   if (!name) return { error: "Name required" }
@@ -25,11 +25,11 @@ export const createSub = async (subredditParam: Omit<Subreddit, 'id' | 'endpoint
 
   const endpoint = createSubredditEndpoint(name);
 
-  const subredditExists = await getSubredditByEndpoint(endpoint);
+  const subredditExists = getSubredditByEndpoint(endpoint);
   if (subredditExists) return ({ error: "Subreddit already exists" });
 
-  const { lastInsertRowid } = await createSubreddit({ ...subredditParam, endpoint });
-  const newSubreddit: Subreddit | null = await getSubredditById(Number(lastInsertRowid));
+  const { lastInsertRowid } = createSubreddit({ ...subredditParam, endpoint });
+  const newSubreddit: Subreddit | null = getSubredditById(Number(lastInsertRowid));
 
   if (!newSubreddit) return ({ error: "Something weird happened." });
 

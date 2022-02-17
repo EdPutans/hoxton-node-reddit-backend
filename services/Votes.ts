@@ -1,39 +1,33 @@
 import { findVotesForUserPost, updateVoteForUserPost } from "../utils/database";
 import { Query, Vote, NoID } from "../utils/types";
 
-
-
-export const getVoteForUserAndPost = async (user_id: Vote['user_id'], post_id: Vote['post_id']): Query<Vote> => {
-  const vote = await findVotesForUserPost({ user_id, post_id });
+export const getVoteForUserAndPost = (user_id: Vote['user_id'], post_id: Vote['post_id']): Query<Vote> => {
+  const vote = findVotesForUserPost({ user_id, post_id });
 
   if (!vote) return { error: "Vote not found" }
 
   return vote;
 }
 
-export const handleUpdatePostRating = async ({ user_id, post_id, direction }: NoID<Vote>): Query<Vote> => {
-  const vote = await findVotesForUserPost({ user_id, post_id });
+export const handleUpdatePostRating = ({ user_id, post_id, direction }: NoID<Vote>): Query<Vote> => {
+  const vote = findVotesForUserPost({ user_id, post_id });
 
   if (!vote) return { error: "Vote not found" }
+  //@ts-ignore
+  let newValue: Vote['direction'] = (Number(vote.direction) || 0) + direction;
 
-  let newDirection: Vote['direction'] | null = null;
-
-  // do nothing
-  if (vote.direction === direction) return vote;
-  // -1 => -1, +1 => +1
-
-  if (vote.direction === -1 && direction === 1) newDirection = 0; // -1 => 0
-  if (vote.direction === 1 && direction === -1) newDirection = 0; // +1 => 0
-  if (vote.direction === 0 && direction === 1) newDirection = 1; // 0 => +1
-  if (vote.direction === 0 && direction === -1) newDirection = -1; // 0 => -1
+  if (!vote.direction) newValue = 0;
+  //shut up i know what im doing
+  if (newValue < -1) newValue = -1;
+  if (newValue > 1) newValue = 1;
 
 
-  if (!newDirection) return vote;
-
-  const { lastInsertRowid } = await updateVoteForUserPost({ user_id, post_id, direction: newDirection });
+  const { lastInsertRowid } = updateVoteForUserPost({ user_id, post_id, direction: newValue });
   if (!lastInsertRowid) return { error: "Could not update vote" };
 
-  const updatedVote = await getVoteForUserAndPost(user_id, post_id);
+  const updatedVote = getVoteForUserAndPost(user_id, post_id);
+
   return updatedVote;
+
 
 }
