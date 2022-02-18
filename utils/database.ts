@@ -82,5 +82,5 @@ export const getCommentsForPost = (post_id: number): Comment[] =>
 export const getCommentById = (id: number): Comment =>
   db.prepare(stmt.getCommentById).get(id);
 
-export const createComment = (comment: NoID<Comment>): RunResult =>
-  db.prepare(stmt.createComment).run(comment);
+export const createComment = ({ content, user_id, post_id }: NoID<Comment>): RunResult =>
+  db.prepare(stmt.createComment).run(content, post_id, user_id);

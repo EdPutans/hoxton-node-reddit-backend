@@ -60,7 +60,7 @@ const seed = () => {
   run.createComment({ content: 'This is a way comment', user_id: 1, post_id: 2 })
   run.createComment({ content: 'This is a to comment', user_id: 2, post_id: 3 })
   run.createComment({ content: 'This is a keep comment', user_id: 1, post_id: 2 })
-  run.createComment({ content: 'This is a and comment', user_id: 3, post_id: 3 })
+  run.createComment({ content: 'This is a an comment', user_id: 3, post_id: 3 })
   run.createComment({ content: 'This is a idiot comment', user_id: 2, post_id: 2 })
   run.createComment({ content: 'This is a busy comment', user_id: 1, post_id: 3 })
   run.createComment({ content: 'This is a for comment', user_id: 2, post_id: 1 })
@@ -72,6 +72,25 @@ const seed = () => {
   run.updateVoteForUserPost({ user_id: 1, post_id: 2, direction: -1 })
   run.updateVoteForUserPost({ user_id: 1, post_id: 3, direction: 1 })
   run.updateVoteForUserPost({ user_id: 1, post_id: 4, direction: 1 })
+
+
+  run.createComment({ content: 'This is a this comment', user_id: 1, post_id: 1 })
+  run.createComment({ content: 'This is a is comment', user_id: 2, post_id: 3 })
+  run.createComment({ content: 'This is a a comment', user_id: 1, post_id: 2 })
+  run.createComment({ content: 'This is a fun comment', user_id: 2, post_id: 2 })
+  run.createComment({ content: 'This is a and comment', user_id: 3, post_id: 1 })
+  run.createComment({ content: 'This is a cool comment', user_id: 2, post_id: 1 })
+  run.createComment({ content: 'This is a way comment', user_id: 1, post_id: 2 })
+  run.createComment({ content: 'This is a to comment', user_id: 2, post_id: 3 })
+  run.createComment({ content: 'This is a keep comment', user_id: 1, post_id: 2 })
+  run.createComment({ content: 'This is a an comment', user_id: 3, post_id: 3 })
+  run.createComment({ content: 'This is a idiot comment', user_id: 2, post_id: 2 })
+  run.createComment({ content: 'This is a busy comment', user_id: 1, post_id: 3 })
+  run.createComment({ content: 'This is a for comment', user_id: 2, post_id: 1 })
+  run.createComment({ content: 'This is a 2 comment', user_id: 3, post_id: 2 })
+  run.createComment({ content: 'This is a minutes comment', user_id: 2, post_id: 1 })
+  // now read only the 4th word of each line
+
 }
 
 seed()

@@ -4,7 +4,7 @@
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
-    "start": "npx ts-node index.ts",
+    "start": "npx nodemon index.ts",
     "seed": "npx ts-node seed.ts"
   },
   "dependencies": {

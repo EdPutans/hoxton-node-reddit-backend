@@ -15,6 +15,14 @@ export const getSubreddit = (endpoint: Subreddit['endpoint']): Query<Subreddit> 
   return foundSubreddit;
 }
 
+export const getSubById = (id: number): Query<Subreddit> => {
+  const foundSubreddit = getSubredditById(id);
+
+  if (!foundSubreddit) return { error: "Subreddit not found" };
+
+  return foundSubreddit;
+}
+
 export const createSub = (subredditParam: Omit<Subreddit, 'id' | 'endpoint'>): Query<Subreddit> => {
   const { name, description, img_url, created_by_user_id } = subredditParam;
 

@@ -17,16 +17,20 @@ export const getUser = (id: number): Query<User> => {
 }
 
 export const signup = ({ username, password }: NoID<User>): Query<User> => {
+  if (!username || !password) return { error: "Username and password are required" };
+
   const userExists = getUserByName(username);
   if (userExists) return ({ error: "User already exists" });
 
   const { lastInsertRowid } = createUser({ username, password });
   const newUser: User = getUserById(Number(lastInsertRowid));
 
-  return newUser;
+  return stripUser(newUser);
 }
 
 export const login = ({ username, password }: NoID<User>): Query<User> => {
+  if (!username || !password) return { error: "Username and password are required" };
+
   const user = getUserByName(username);
 
   if (!user || user?.password !== password)
